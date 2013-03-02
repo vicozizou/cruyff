@@ -1,0 +1,39 @@
+# Eclipse
+*.launch
+*.buildpath
+*.classpath
+*.eclipse/
+*.metadata
+*.project
+*.revision/
+*.settings/
+bin/
+
+# General
+*~
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+*.idea/
+
+# Java
+*.class
+*.ear
+*.jar
+*.war
+
+# Maven
+target/
+
+# Netbeans
+build/
+dist/
+nbbuild/
+nbdist/
+nbproject/
+
+# Subversion
+*.svn/
+

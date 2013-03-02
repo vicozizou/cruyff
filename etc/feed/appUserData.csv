@@ -1,0 +1,12 @@
+#personBackDoor: birthday, first_name, gender, identification, identification_type, last_name1, last_name2, middle_name, home_place, nationality, work_place
+1977-10-31, Victor, MALE, 109850170, LOCALE, Alfaro Vargas,false,,,
+#userRoleBackDoor:
+ROLE_ADMIN
+#appUserBackDoor: days_to_expire, deleted, last_login_date, login_attempts, "password", user_status, username, id
+0, , 0, admin, ACTIVE, admin,
+#personBackDoor:
+1947-04-25, Johan, MALE, 12345678, LOCALE, Cruyff,false,,,
+#userRoleBackDoor:
+ROLE_USER
+#appUserBackDoor:
+0, , 0, user, ACTIVE, user,

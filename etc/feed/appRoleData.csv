@@ -1,0 +1,3 @@
+#description,app_role
+Administration Role,ROLE_ADMIN
+Authenticated User,ROLE_USER
