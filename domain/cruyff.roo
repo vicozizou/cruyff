@@ -1,0 +1,177 @@
+project --topLevelPackage com.bytepoxic.core --java 6 --projectName cruyff
+//persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
+//persistence setup --database MYSQL --provider HIBERNATE --databaseName medatum --userName medatum --password medatum
+jpa setup --database POSTGRES --provider HIBERNATE --databaseName anfield --userName kalel --password krypt0n1t3
+
+enum type --class ~.model.PhoneType
+field string --fieldName type --notNull
+field string --fieldName labelKey --sizeMax 128
+enum constant --name HOME_PHONE
+enum constant --name HOME_FAX
+enum constant --name WORK_PHONE 
+enum constant --name WORK_FAX
+enum constant --name MOBILE_PHONE
+
+enum type --class ~.model.Gender
+field string --fieldName gender --notNull
+field string --fieldName labelKey --sizeMax 128
+enum constant --name MALE
+enum constant --name FEMALE
+
+enum type --class ~.model.IdentificationType
+field string --fieldName type --notNull
+field string --fieldName labelKey --sizeMax 128
+enum constant --name LOCALE
+enum constant --name RESIDENCEsc
+enum constant --name AMNESTY
+enum constant --name PASSPORT
+enum constant --name OTHER
+
+enum type --class ~.model.EmailType
+field string --fieldName type --notNull
+field string --fieldName labelKey --sizeMax 128
+enum constant --name HOME_EMAIL
+enum constant --name WORK_EMAIL
+
+enum type --class ~.model.UserStatus
+field string --fieldName userStatus --notNull
+field string --fieldName labelKey --sizeMax 128
+enum constant --name ACTIVE
+enum constant --name BLOCKED
+enum constant --name EXPIRED
+
+enum type --class ~.model.FieldType
+field string --fieldName type --notNull
+field string --fieldName javaType --notNull
+field string --fieldName labelKey --sizeMax 128
+enum constant --name TEXT_TYPE
+enum constant --name INTEGER_TYPE
+enum constant --name LONG_TYPE
+enum constant --name FLOAT_TYPE
+enum constant --name DOUBLE_TYPE
+enum constant --name BIG_DECIMAL_TYPE
+enum constant --name BOOLEAN_TYPE
+enum constant --name DATE_TYPE
+
+enum type --class ~.model.TrackingType
+field string --fieldName type --notNull
+field string --fieldName labelKey --sizeMax 128
+
+interface --class ~.model.I18Nable
+//add getLabelKey() method
+
+interface --class ~.model.SoftDeleteable
+//add isDeleted() method
+
+interface --class ~.model.DateTrackable
+//add getCreationDate() method
+//add getUpdateDate() method
+
+interface --class ~.model.Enable
+//add isEnabled() method
+
+entity jpa --class ~.model.I18NableEntity --abstract --inheritanceType TABLE_PER_CLASS
+//implements I18Nable
+field string --fieldName labelKey --sizeMax 128
+
+entity jpa --class ~.model.BaseEntity --abstract --inheritanceType TABLE_PER_CLASS
+//implements SoftDeleteable, DateTrackable
+field boolean --fieldName deleted --notNull
+field date --fieldName creationDate --type java.util.Date --notNull
+field date --fieldName updateDate --type java.util.Date
+
+entity jpa --class ~.model.BaseFullEntity --abstract --extends ~.model.BaseEntity --inheritanceType TABLE_PER_CLASS
+//implements Enable
+field boolean --fieldName enabled --notNull
+
+entity jpa --class ~.model.NameValueSetting --abstract --extends ~.model.I18NableEntity --inheritanceType TABLE_PER_CLASS
+field string --fieldName name --notNull --unique --sizeMax 64
+field string --fieldName theValue --sizeMax 128
+field enum --fieldName type --type ~.model.FieldType --notNull
+
+entity jpa --class ~.model.Location --extends ~.model.BaseEntity
+field reference --fieldName parent --type ~.model.Location
+field string --fieldName name --notNull --sizeMax 64
+field string --fieldName code --sizeMax 2 --unique
+field boolean --fieldName appCurrent --notNull
+field number --fieldName latitude --type java.lang.Double
+field number --fieldName longitude --type java.lang.Double
+field number --fieldName zoom --type java.lang.Integer
+field set --fieldName children --type ~.model.Location --cardinality ONE_TO_MANY --mappedBy country
+finder add --finderName findLocationsByParent
+finder add --finderName findLocationsByName
+finder add --finderName findLocationsByCode
+
+entity jpa --class ~.model.Nationality --extends ~.model.I18NableEntity
+field string --fieldName name --notNull --unique --sizeMax 64
+field reference --fieldName country --type ~.model.Location --notNull
+finder add --finderName findNationalitysByName
+
+focus --class ~.model.Location
+field reference --fieldName nationality --type ~.model.Nationality --joinColumnName country
+
+entity jpa --class ~.model.Phone
+field string --fieldName phoneNumber --notNull --sizeMax 64
+field enum --fieldName type --type ~.model.PhoneType --notNull
+
+entity jpa --class ~.model.Place
+field string --fieldName name --sizeMax 64
+field reference --fieldName location --type ~.model.Location --notNull
+field string --fieldName primaryAddress --sizeMax 256 --notNull
+field string --fieldName secondaryAddress --sizeMax 256
+field number --fieldName latitude --type java.lang.Double
+field number --fieldName longitude --type java.lang.Double
+field number --fieldName zoom --type java.lang.Integer
+
+entity jpa --class ~.model.Email
+field string --fieldName emailAddress --notNull --unique --sizeMax 64
+field enum --fieldName type --type ~.model.EmailType --notNull
+
+entity jpa --class ~.model.Person --abstract --extends ~.model.BaseEntity --inheritanceType JOINED
+field string --fieldName firstnames --notNull --sizeMax 128
+field string --fieldName lastnames --notNull --sizeMax 128
+field enum --fieldName gender --type ~.model.Gender --notNull
+field date --fieldName birthday --type java.util.Date --notNull
+field string --fieldName identification --notNull --unique --sizeMax 64
+field enum --fieldName identificationType --type ~.model.IdentificationType --notNull
+field reference --fieldName nationality --type ~.model.Nationality
+field reference --fieldName homePlace --type ~.model.Place
+field reference --fieldName workPlace --type ~.model.Place
+
+focus --class ~.model.Phone
+field reference --fieldName owner --type ~.model.Person
+
+focus --class ~.model.Email
+field reference --fieldName owner --type ~.model.Person
+
+focus --class ~.model.Person
+field set --fieldName phones --type ~.model.Phone --cardinality ONE_TO_MANY --mappedBy owner
+field set --fieldName emails --type ~.model.Email --cardinality ONE_TO_MANY --mappedBy owner
+
+entity jpa --class ~.model.AppRole --extends ~.model.I18NableEntity
+field string --fieldName name --notNull --unique --sizeMax 32
+field string --fieldName description --sizeMax 128
+finder add --finderName findAppRolesByName 
+
+entity jpa --class ~.model.AppUser --extends ~.model.Person
+field string --fieldName username --notNull --sizeMax 32 --unique
+field string --fieldName password --notNull --sizeMax 64
+field set --fieldName roles --type ~.model.AppRole --notNull
+field enum --fieldName userStatus --type ~.model.UserStatus
+field number --fieldName loginAttempts --type java.lang.Integer
+field date --fieldName lastLoginDate --type java.util.Date
+field number --fieldName daysToExpire --type java.lang.Integer
+finder add --finderName findAppUsersByUsername
+
+entity jpa --class ~.model.UserTrack
+field reference --fieldName tracked --type ~.model.AppUser
+field enum --fieldName trackingType --type ~.model.TrackingType --notNull
+field date --fieldName trackingDate --type java.util.Date --notNull
+finder add --finderName findUserTracksByTracked
+finder add --finderName findUserTracksByTrackingDate
+finder add --finderName findUserTracksByTrackedAndTrackingDate
+
+//controller scaffold --class ~.web.PhoneController --entity ~.model.Phone
+//controller all --package ~.web
+
+//security setup
