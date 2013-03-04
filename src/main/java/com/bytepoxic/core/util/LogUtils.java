@@ -1,4 +1,4 @@
-package com.aureabox.webcore.util;
+package com.bytepoxic.core.util;
 
 import java.util.Collection;
 import java.util.Map;
